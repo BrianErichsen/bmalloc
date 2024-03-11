@@ -6,7 +6,7 @@
 //calls for allocating/deallocating virtual memory from the OS
 
 #include <iostream>
-struct HashEntry;
+#include "hashTable.h"
 
 class B_Malloc {
 public:
@@ -14,27 +14,16 @@ public:
     B_Malloc();
     ~B_Malloc();
 
-    void* operator new(std::size_t size);
-    void operator delete(void* ptr) noexcept;
+    // void* operator new(std::size_t size);
+    // void operator delete(void* ptr) noexcept;
 
     void* allocate(size_t bytesToAllocate);
     void deallocate(void* ptr);
 
-protected:
-    struct HashEntry { //represents each entry or bucket
-        void* address;//stores address of allocated memory
-        size_t size;//and size of allocated memory block
-        //default constructor
-        HashEntry() : address(nullptr), size(0) {}
-        //constructor that takes arguments
-        HashEntry(void* addr, size_t s) : address(addr), size(s) {}
-    };
 private:
-    std::vector<HashEntry> hashTable;
+    // std::vector<HashEntry> hashTable;
+    HashTable hashT;
     size_t hashFunction(void* address);
-    void growHashTable();
-    void* roundUptoPageSize(void* address, size_t pageSize);
-
 };//end of class bracket
 
 #endif //BMALLOC_H

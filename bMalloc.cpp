@@ -7,14 +7,8 @@
 //implementation of bMalloc class // see bMalloc.h for class description
 
 //default constructor
-B_Malloc::B_Malloc() {
-    const size_t initialSize = 16;//size is arbitrary
-    hashTable.resize(initialSize);//sets the hashtable to initial size
-    //iterates through whole hash table
-    for (size_t i = 0; i < initialSize; ++i) {
-        hashTable[i].address = nullptr;//sets all addresses to null
-        hashTable[i].size = 0;// sets all sizes to 0
-    }
+B_Malloc::B_Malloc() : hashT(100) {
+
 }
 
 //default destructor
@@ -45,8 +39,9 @@ void* B_Malloc::allocate(size_t bytesToAllocate) {
         return nullptr;
     }
     //inserts the returned pointer and allocation size in hash table
-    hashTable[hashFunction(allocatedAddress)].address = allocatedAddress;
-    hashTable[hashFunction(allocatedAddress)].size = bytesToAllocate;
+    // hashTable[hashFunction(allocatedAddress)].address = allocatedAddress;
+    // hashTable[hashFunction(allocatedAddress)].size = bytesToAllocate;
+    hashT.insert(allocatedAddress, bytesToAllocate);
 
     return allocatedAddress;//returns new allocated address
 }//end of allocate method bracket
@@ -54,21 +49,20 @@ void* B_Malloc::allocate(size_t bytesToAllocate) {
 //default deallocate method to free memory
 void B_Malloc::deallocate(void* ptr) {
     //finds the index for given pointer to be removed from hash table
-    size_t index = hashFunction(ptr);
+    size_t index = hashT.find(ptr);
     //for debugging reasons
-    std::cout << "Index: " << index << ", Size: " << hashTable.size() <<
-    ", Address: " << hashTable[index].address << std::endl;
+    // std::cout << "Index: " << index << ", Size: " << hashT.getTableSize() <<
+    // ", Address: " << hashT.getTableAddress(index) << std::endl;
 
     //if index is valid and equal to a address in hash table
-    if (index != hashTable.size() && hashTable[index].address == ptr) {
+    if (index != hashT.getTableSize() && hashT.getTableAddress(index) == ptr) {
         //performs the lazy delete
-        hashTable[index].address = nullptr;
-        hashTable[index].size = 0;
+        hashT.remove(ptr);
 
         //https://linux.die.net/man/2/munmap
         //deallocates memory by using munmap sys call
         //int munmap(void *addr, size_t length);
-        munmap(ptr, hashTable[index].size);
+        munmap(ptr, hashT.getTableEntrySize(index));
     } else {
         //only reaches here when given pointer was not found in hash table
         std::cerr << "Error: Invalid pointer for deallocation!" << std::endl;
@@ -76,15 +70,5 @@ void B_Malloc::deallocate(void* ptr) {
 }//end of deallocate method bracket
 
 size_t B_Malloc::hashFunction(void* address) {
-    return reinterpret_cast<size_t>(address) % hashTable.size();
-}
-
-//this creates a temp instance
-void* B_Malloc::operator new(std::size_t size) {
-    return B_Malloc().allocate(size);
-}
-
-//creates temp instance
-void B_Malloc::operator delete(void* ptr) noexcept {
-    B_Malloc().deallocate(ptr);
+    return reinterpret_cast<size_t>(address) % hashT.getTableSize();
 }

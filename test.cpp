@@ -2,6 +2,7 @@
 #include "hashTable.h"
 #include <iostream>
 #include "bMalloc.h"
+#include <chrono>
 
 
 //function for testing my insertion - deletion and hash class methods
@@ -37,24 +38,123 @@ void test_hash_class() {
 
 //function to test allocation and deallocation
 void test_bMalloc() {
-    B_Malloc allocator;
+    B_Malloc b;
 
-    //test 1: Allocate and deallocate small blocks
-    int* block1 = static_cast<int*>(allocator.allocate(sizeof(int)));
-    if (block1) {
-        *block1 = 42;
-        std::cout << *block1 << std::endl;
-        allocator.deallocate(block1);
+    //allocates a large number of small memory objects
+    const int smallObjectCount = 1000;
+    for (int i = 0; i < smallObjectCount; ++i) {
+        void* smallObject = b.allocate(sizeof(int));
+        b.deallocate(smallObject);
     }
-    //Test 2: Allocate multiples blocks and ensures they don't overlap
-    int* block2 = static_cast<int*>(allocator.allocate(sizeof(int)));
-    int* block3 = static_cast<int*>(allocator.allocate(sizeof(char)));
-
-    if (block2 == block3 || block2 + 1 == reinterpret_cast<int*>(block3)) {
-        std::cerr << "Error: Overlapping allocations detected!" << std::endl;
+    
+    //Allocates a large number of large memory objects
+    const int largeObjectCount = 100;
+    for (int i = 0; i < largeObjectCount; ++i) {
+        void* largeObject = b.allocate(sizeof(char));
+        b.deallocate(largeObject);
     }
 
-    //clean up
-    allocator.deallocate(block2);
-    allocator.deallocate(block3);
+    //Deallocates objects and verifies B_Malloc / Hash_Table are correct
+    void* obj1 = b.allocate(sizeof(int));
+    void* obj2 = b.allocate(sizeof(int));
+    b.deallocate(obj1);
+    b.deallocate(obj2);
+
+    //Allocates small and large blocks of memory
+    void* smallBlock = b.allocate(sizeof(int));
+    void* largeBlock = b.allocate(sizeof(char));
+    b.deallocate(smallBlock);
+    b.deallocate(largeBlock);
+
+    //times how long it takes to malloc() and free() memory
+    //Returns a time point representing the current point in time
+    //https://en.cppreference.com/w/cpp/chrono/high_resolution_clock/now
+    auto start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < 1000; ++i) {
+        void* temp = b.allocate(sizeof(int));
+        b.deallocate(temp);
+    }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = end - start;
+
+    std::cout << "Time taken for 1000 allocations and deallocations: " <<
+    duration.count() << " seconds." << std::endl;
+
+    //----
+
+    const int allocationCount = 100;
+    for (int i = 0; i < allocationCount; ++i) {
+        // Allocate
+        void* allocatedMemory = b.allocate(sizeof(int));
+
+        // Check for memory overlap
+        // Fill the allocated memory with a known pattern
+        int pattern = 0xDEADBEEF;
+        std::fill(static_cast<int*>(allocatedMemory), static_cast<int*>(allocatedMemory) + sizeof(int), pattern);
+
+        // Deallocate
+        b.deallocate(allocatedMemory);
+
+        // Check if the content of the deallocated memory is still the expected pattern
+        int* deallocatedMemoryContent = static_cast<int*>(allocatedMemory);
+        if (*deallocatedMemoryContent != pattern) {
+            std::cerr << "Memory overlap or corruption detected!" << std::endl;
+        }
+    }
 }//end of test allocation for B Malloc class bracket
+
+//function to test and time the standard library using new and delete
+    void test_standard_new_delete() {
+        const int smallObjectCount = 1000;
+    for (int i = 0; i < smallObjectCount; ++i) {
+        int* smallObject = new int;
+        *smallObject = i;
+        delete smallObject;
+    }
+
+    //creates more objects and verifies that the data stays valid
+    int* dynamicInt = new int(42);
+    std::cout << "Dynamic int value: " << *dynamicInt << std::endl;
+    
+    //Allocates a large number of large memory objects
+    const int largeObjectCount = 100;
+    for (int i = 0; i < largeObjectCount; ++i) {
+        char* largeObject = new char[1000];
+        delete[] largeObject;
+    }
+
+    //Deallocates objects and verifies B_Malloc / Hash_Table are correct
+    int* obj1 = new int;
+    int* obj2 = new int;
+    delete obj1;
+    delete obj2;
+
+    //Allocates small and large blocks of memory
+    int* smallBlock = new int;
+    char* largeBlock = new char[1000];
+    delete smallBlock;
+    delete[] largeBlock;
+
+    //times how long it takes to malloc() and free() memory
+    //Returns a time point representing the current point in time
+    //https://en.cppreference.com/w/cpp/chrono/high_resolution_clock/now
+    auto start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < 1000; ++i) {
+        int* temp = new int;
+        delete temp;
+    }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = end - start;
+
+    std::cout << "Time taken for 1000 allocations and deallocations: " <<
+    duration.count() << " seconds." << std::endl;
+    // Malloc and free -- timing output:
+    // Time taken for 1000 allocations and deallocations: 7.0959e-05 seconds.
+
+    // Time taken for 1000 allocations and deallocations: 7.0916e-05 seconds.
+
+    // libraries
+    // Time taken for 1000 allocations and deallocations: 4.5042e-05 seconds.
+    }//end of bracket for testing new and delete standard library

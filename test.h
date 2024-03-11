@@ -5,4 +5,5 @@
 //functions
 void test_hash_class();
 void test_bMalloc();
+void test_standard_new_delete();
 #endif //TEST_H

@@ -16,6 +16,22 @@ public:
     void remove(void* address);
     size_t find(void* address);
     const size_t EMPTY = static_cast<size_t>(-1);
+    size_t getTableSize() const {
+        return table.size();
+    }
+    void* getTableAddress(size_t index) const {
+        if (index < table.size()) {
+            return table[index].address;
+        } else
+        return nullptr;
+    }
+    
+    size_t getTableEntrySize(size_t index) {
+        if (index < table.size()) {
+            return table[index].size;
+        } else
+            return 0;
+    }
 
 private:
     struct HashEntry { //represents each entry or bucket
