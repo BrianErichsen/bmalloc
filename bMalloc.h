@@ -6,6 +6,7 @@
 //calls for allocating/deallocating virtual memory from the OS
 
 #include <iostream>
+struct HashEntry;
 
 class B_Malloc {
 public:
@@ -19,7 +20,7 @@ public:
     void* allocate(size_t bytesToAllocate);
     void deallocate(void* ptr);
 
-private:
+protected:
     struct HashEntry { //represents each entry or bucket
         void* address;//stores address of allocated memory
         size_t size;//and size of allocated memory block
@@ -28,6 +29,7 @@ private:
         //constructor that takes arguments
         HashEntry(void* addr, size_t s) : address(addr), size(s) {}
     };
+private:
     std::vector<HashEntry> hashTable;
     size_t hashFunction(void* address);
     void growHashTable();

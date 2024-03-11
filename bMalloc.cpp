@@ -2,6 +2,7 @@
 #include "hashTable.h"
 #include <unistd.h>
 #include <sys/mman.h>
+#include <vector>
 
 //implementation of bMalloc class // see bMalloc.h for class description
 
@@ -24,6 +25,7 @@ B_Malloc::~B_Malloc() {
 //I had to change my configuration to Linux to support getpagesize
 void* B_Malloc::allocate(size_t bytesToAllocate) {
     const size_t pageSize = getpagesize();
+
 
     //rounds up how many bytes to the next multiple of the page size
     bytesToAllocate = ((bytesToAllocate + pageSize - 1) / pageSize) *
@@ -53,6 +55,9 @@ void* B_Malloc::allocate(size_t bytesToAllocate) {
 void B_Malloc::deallocate(void* ptr) {
     //finds the index for given pointer to be removed from hash table
     size_t index = hashFunction(ptr);
+    //for debugging reasons
+    std::cout << "Index: " << index << ", Size: " << hashTable.size() <<
+    ", Address: " << hashTable[index].address << std::endl;
 
     //if index is valid and equal to a address in hash table
     if (index != hashTable.size() && hashTable[index].address == ptr) {
@@ -71,7 +76,7 @@ void B_Malloc::deallocate(void* ptr) {
 }//end of deallocate method bracket
 
 size_t B_Malloc::hashFunction(void* address) {
-    return reinterpret_cast<size_t>(address) & hashTable.size();
+    return reinterpret_cast<size_t>(address) % hashTable.size();
 }
 
 //this creates a temp instance
