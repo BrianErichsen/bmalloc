@@ -16,18 +16,19 @@ public:
     void remove(void* address);
     size_t find(void* address);
     const size_t EMPTY = static_cast<size_t>(-1);
+    
     size_t getTableSize() const {
-        return table.size();
+        return currentSize;
     }
     void* getTableAddress(size_t index) const {
-        if (index < table.size()) {
+        if (index < currentSize) {
             return table[index].address;
         } else
         return nullptr;
     }
     
     size_t getTableEntrySize(size_t index) {
-        if (index < table.size()) {
+        if (index < currentSize) {
             return table[index].size;
         } else
             return 0;
@@ -43,8 +44,10 @@ private:
         HashEntry(void* addr, size_t s) : address(addr), size(s) {}
     };//end of struct bracket
 
-    std::vector<HashEntry> table;
+    // std::vector<HashEntry> table;
+    HashEntry* table;
     size_t currentSize;
+    size_t initialSize;
 
     size_t hashFunction(void* address);
     void grow();

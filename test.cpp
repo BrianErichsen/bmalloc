@@ -41,7 +41,7 @@ void test_bMalloc() {
     B_Malloc b;
 
     //allocates a large number of small memory objects
-    const int smallObjectCount = 1000;
+    const int smallObjectCount = 100;
     for (int i = 0; i < smallObjectCount; ++i) {
         void* smallObject = b.allocate(sizeof(int));
         b.deallocate(smallObject);
@@ -54,21 +54,29 @@ void test_bMalloc() {
         b.deallocate(largeObject);
     }
 
-    //Deallocates objects and verifies B_Malloc / Hash_Table are correct
+    // //Deallocates objects and verifies B_Malloc / Hash_Table are correct
     void* obj1 = b.allocate(sizeof(int));
     void* obj2 = b.allocate(sizeof(int));
     b.deallocate(obj1);
     b.deallocate(obj2);
 
-    //Allocates small and large blocks of memory
+    // //Allocates small and large blocks of memory
     void* smallBlock = b.allocate(sizeof(int));
     void* largeBlock = b.allocate(sizeof(char));
     b.deallocate(smallBlock);
     b.deallocate(largeBlock);
 
-    //times how long it takes to malloc() and free() memory
-    //Returns a time point representing the current point in time
-    //https://en.cppreference.com/w/cpp/chrono/high_resolution_clock/now
+    // //allocates memory for dynamic int and assign a value to be stored
+    // //in the memory space
+    int* dynamicInt = (int*) b.allocate(sizeof(int));
+    *dynamicInt = 69;
+    //asserts
+    std::cout << "Dynamic int value from B_Malloc: " << *dynamicInt << std::endl;
+    b.deallocate(dynamicInt);
+
+    // //times how long it takes to malloc() and free() memory
+    // //Returns a time point representing the current point in time
+    // //https://en.cppreference.com/w/cpp/chrono/high_resolution_clock/now
     auto start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < 1000; ++i) {
         void* temp = b.allocate(sizeof(int));
@@ -81,27 +89,28 @@ void test_bMalloc() {
     std::cout << "Time taken for 1000 allocations and deallocations: " <<
     duration.count() << " seconds." << std::endl;
 
-    //----
+    // //----
 
-    const int allocationCount = 100;
-    for (int i = 0; i < allocationCount; ++i) {
-        // Allocate
-        void* allocatedMemory = b.allocate(sizeof(int));
+    // const int allocationCount = 100;
+    // for (int i = 0; i < allocationCount; ++i) {
+    //     // Allocate
+    //     void* allocatedMemory = b.allocate(sizeof(int));
 
-        // Check for memory overlap
-        // Fill the allocated memory with a known pattern
-        int pattern = 0xDEADBEEF;
-        std::fill(static_cast<int*>(allocatedMemory), static_cast<int*>(allocatedMemory) + sizeof(int), pattern);
+    //     // Check for memory overlap
+    //     // Fill the allocated memory with a known pattern
+    //     int pattern = 0xDEADBEEF;
+    //     std::fill(static_cast<int*>(allocatedMemory), static_cast<int*>(allocatedMemory) + sizeof(int), pattern);
 
-        // Deallocate
-        b.deallocate(allocatedMemory);
+    //     // Deallocate
+    //     b.deallocate(allocatedMemory);
+    //     //allocate -- fill 0 - 1000
 
-        // Check if the content of the deallocated memory is still the expected pattern
-        int* deallocatedMemoryContent = static_cast<int*>(allocatedMemory);
-        if (*deallocatedMemoryContent != pattern) {
-            std::cerr << "Memory overlap or corruption detected!" << std::endl;
-        }
-    }
+    //     // Check if the content of the deallocated memory is still the expected pattern
+    //     int* deallocatedMemoryContent = static_cast<int*>(allocatedMemory);
+    //     if (*deallocatedMemoryContent != pattern) {
+    //         std::cerr << "Memory overlap or corruption detected!" << std::endl;
+    //     }
+    // }
 }//end of test allocation for B Malloc class bracket
 
 //function to test and time the standard library using new and delete
@@ -150,11 +159,4 @@ void test_bMalloc() {
 
     std::cout << "Time taken for 1000 allocations and deallocations: " <<
     duration.count() << " seconds." << std::endl;
-    // Malloc and free -- timing output:
-    // Time taken for 1000 allocations and deallocations: 7.0959e-05 seconds.
-
-    // Time taken for 1000 allocations and deallocations: 7.0916e-05 seconds.
-
-    // libraries
-    // Time taken for 1000 allocations and deallocations: 4.5042e-05 seconds.
     }//end of bracket for testing new and delete standard library

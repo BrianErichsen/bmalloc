@@ -55,7 +55,7 @@ void B_Malloc::deallocate(void* ptr) {
     // ", Address: " << hashT.getTableAddress(index) << std::endl;
 
     //if index is valid and equal to a address in hash table
-    if (index != hashT.getTableSize() && hashT.getTableAddress(index) == ptr) {
+    if (index != -1) {
         //performs the lazy delete
         hashT.remove(ptr);
 
@@ -68,7 +68,3 @@ void B_Malloc::deallocate(void* ptr) {
         std::cerr << "Error: Invalid pointer for deallocation!" << std::endl;
     }
 }//end of deallocate method bracket
-
-size_t B_Malloc::hashFunction(void* address) {
-    return reinterpret_cast<size_t>(address) % hashT.getTableSize();
-}
