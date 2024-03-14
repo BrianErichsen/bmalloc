@@ -11,6 +11,12 @@
 /* Lazy delete strategy is where an entry for deletion is not immedi-
 ately removed from the table. Instead a special flag or marker is used
 to indicate that entry is logically deleted but it remains in the table.
+
+--To compile program - simple type on the terminal make malloc
+using ./malloc will automatically run tests called in main - some
+tests use assertion to make sure that is no overlap and that
+program is allocating proper resources.
+After done type make clean to clean up exe file and .o files
 */
 
 int main () {
