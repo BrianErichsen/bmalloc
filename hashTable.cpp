@@ -1,3 +1,6 @@
+//Author: Brian Erichsen Fagundes
+//MSD - Spring of 2024
+//Malloc replacement / implementation
 #include "hashTable.h"
 #include <sys/mman.h>
 

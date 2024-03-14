@@ -1,8 +1,13 @@
+//Author: Brian Erichsen Fagundes
+//MSD - Spring of 2024
+//Malloc replacement / implementation
 #include "test.h"
 #include "hashTable.h"
 #include <iostream>
 #include "bMalloc.h"
 #include <chrono>
+#include <cassert>
+
 
 
 //function for testing my insertion - deletion and hash class methods
@@ -48,10 +53,10 @@ void test_bMalloc() {
     }
     
     //Allocates a large number of large memory objects
-    const int largeObjectCount = 100;
+    const int largeObjectCount = 1000;
     for (int i = 0; i < largeObjectCount; ++i) {
-        void* largeObject = b.allocate(sizeof(char));
-        b.deallocate(largeObject);
+        void* charObject = b.allocate(sizeof(char));
+        b.deallocate(charObject);
     }
 
     // //Deallocates objects and verifies B_Malloc / Hash_Table are correct
@@ -70,9 +75,11 @@ void test_bMalloc() {
     // //in the memory space
     int* dynamicInt = (int*) b.allocate(sizeof(int));
     *dynamicInt = 69;
-    //asserts
+    //asserts that dynamicInt holds the value given to that specific address
+    assert(*dynamicInt == 69);
     std::cout << "Dynamic int value from B_Malloc: " << *dynamicInt << std::endl;
     b.deallocate(dynamicInt);
+    //Performs the benchmark timing
 
     // //times how long it takes to malloc() and free() memory
     // //Returns a time point representing the current point in time
@@ -89,62 +96,36 @@ void test_bMalloc() {
     std::cout << "Time taken for 1000 allocations and deallocations: " <<
     duration.count() << " seconds." << std::endl;
 
-    // //----
+    // performs testing for overlapping
+    int* int1 = (int*) b.allocate(sizeof(int));
+    *int1 = 70;
 
-    // const int allocationCount = 100;
-    // for (int i = 0; i < allocationCount; ++i) {
-    //     // Allocate
-    //     void* allocatedMemory = b.allocate(sizeof(int));
+    int* int2 = (int*) b.allocate(sizeof(int));
+    *int2 = 71;
 
-    //     // Check for memory overlap
-    //     // Fill the allocated memory with a known pattern
-    //     int pattern = 0xDEADBEEF;
-    //     std::fill(static_cast<int*>(allocatedMemory), static_cast<int*>(allocatedMemory) + sizeof(int), pattern);
+    //asserts
+    assert(*int1 == 70);
+    assert(*int2 == 71);
 
-    //     // Deallocate
-    //     b.deallocate(allocatedMemory);
-    //     //allocate -- fill 0 - 1000
+    b.deallocate(int1);
+    b.deallocate(int2);
+    //-- second part of checking for overlap
+    const int count = 100;
+    int* allocatedIntegers[count];//creates an array of ints
 
-    //     // Check if the content of the deallocated memory is still the expected pattern
-    //     int* deallocatedMemoryContent = static_cast<int*>(allocatedMemory);
-    //     if (*deallocatedMemoryContent != pattern) {
-    //         std::cerr << "Memory overlap or corruption detected!" << std::endl;
-    //     }
-    // }
+    for (int i = 0; i < count; ++i) {
+        allocatedIntegers[i] = static_cast<int*>(b.allocate(sizeof(int)));
+        *allocatedIntegers[i] = i;
+    }
+
+    for (int i = 0; i < count; ++i) {
+        assert(*allocatedIntegers[i] == i);
+    }
 }//end of test allocation for B Malloc class bracket
 
 //function to test and time the standard library using new and delete
     void test_standard_new_delete() {
-        const int smallObjectCount = 1000;
-    for (int i = 0; i < smallObjectCount; ++i) {
-        int* smallObject = new int;
-        *smallObject = i;
-        delete smallObject;
-    }
-
-    //creates more objects and verifies that the data stays valid
-    int* dynamicInt = new int(42);
-    std::cout << "Dynamic int value: " << *dynamicInt << std::endl;
-    
-    //Allocates a large number of large memory objects
-    const int largeObjectCount = 100;
-    for (int i = 0; i < largeObjectCount; ++i) {
-        char* largeObject = new char[1000];
-        delete[] largeObject;
-    }
-
-    //Deallocates objects and verifies B_Malloc / Hash_Table are correct
-    int* obj1 = new int;
-    int* obj2 = new int;
-    delete obj1;
-    delete obj2;
-
-    //Allocates small and large blocks of memory
-    int* smallBlock = new int;
-    char* largeBlock = new char[1000];
-    delete smallBlock;
-    delete[] largeBlock;
-
+        
     //times how long it takes to malloc() and free() memory
     //Returns a time point representing the current point in time
     //https://en.cppreference.com/w/cpp/chrono/high_resolution_clock/now

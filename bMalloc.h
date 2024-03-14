@@ -1,3 +1,6 @@
+//Author: Brian Erichsen Fagundes
+//MSD - Spring of 2024
+//Malloc replacement / implementation
 #ifndef BMALLOC_H
 #define BMALLOC_H
 //author: Brian Erichsen Fagundes

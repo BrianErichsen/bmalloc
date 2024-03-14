@@ -1,3 +1,6 @@
+//Author: Brian Erichsen Fagundes
+//MSD - Spring of 2024
+//Malloc replacement / implementation
 #ifndef HASH_TABLE_H
 #define HASH_TABLE_H
 
