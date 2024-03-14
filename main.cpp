@@ -7,7 +7,11 @@
 #include "bMalloc.h"
 #include "test.h"
 
-
+//what is lazy delete? from a hash table?
+/* Lazy delete strategy is where an entry for deletion is not immedi-
+ately removed from the table. Instead a special flag or marker is used
+to indicate that entry is logically deleted but it remains in the table.
+*/
 
 int main () {
     //performs my custom testing for the hash class and BMalloc class

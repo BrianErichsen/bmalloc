@@ -9,10 +9,8 @@
 
 //implementation of bMalloc class // see bMalloc.h for class description
 
-//default constructor
-B_Malloc::B_Malloc() : hashT(100) {
-
-}
+//default constructor // sets hashTable initial size to 100
+B_Malloc::B_Malloc() : hashT(100) {}
 
 //default destructor
 B_Malloc::~B_Malloc() {
@@ -21,13 +19,10 @@ B_Malloc::~B_Malloc() {
 
 //I had to change my configuration to Linux to support getpagesize
 void* B_Malloc::allocate(size_t bytesToAllocate) {
-    const size_t pageSize = getpagesize();
-
-
+    const size_t pageSize = getpagesize();//gets the page size
     //rounds up how many bytes to the next multiple of the page size
     bytesToAllocate = ((bytesToAllocate + pageSize - 1) / pageSize) *
     pageSize;
-
     //uses system call - request a block of memory size given # of bytes
     //anonymous and private flags make sure that mapping is private and
     //not associated with any file // -1 is the file descriptor param
@@ -35,15 +30,12 @@ void* B_Malloc::allocate(size_t bytesToAllocate) {
     //void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);
     void * allocatedAddress = mmap(nullptr, bytesToAllocate, PROT_READ |
     PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-
     //if failed then displays error and returns a nullpointer
     if (allocatedAddress == MAP_FAILED) {
         std::cerr << "Allocation has failed!" << std::endl;
         return nullptr;
     }
     //inserts the returned pointer and allocation size in hash table
-    // hashTable[hashFunction(allocatedAddress)].address = allocatedAddress;
-    // hashTable[hashFunction(allocatedAddress)].size = bytesToAllocate;
     hashT.insert(allocatedAddress, bytesToAllocate);
 
     return allocatedAddress;//returns new allocated address
@@ -59,9 +51,8 @@ void B_Malloc::deallocate(void* ptr) {
 
     //if index is valid and equal to a address in hash table
     if (index != -1) {
-        //performs the lazy delete
+        //removes entries of address and size
         hashT.remove(ptr);
-
         //https://linux.die.net/man/2/munmap
         //deallocates memory by using munmap sys call
         //int munmap(void *addr, size_t length);

@@ -7,8 +7,7 @@
 #include "bMalloc.h"
 #include <chrono>
 #include <cassert>
-
-
+#include <iomanip>
 
 //function for testing my insertion - deletion and hash class methods
 void test_hash_class() {
@@ -38,12 +37,11 @@ void test_hash_class() {
     } else {
         std::cout << "Failed to remove address" << std::endl;
     }
-
 }//end of function to test hash table class methods
 
 //function to test allocation and deallocation
 void test_bMalloc() {
-    B_Malloc b;
+    B_Malloc b;//creates a object for allocation and deallocation
 
     //allocates a large number of small memory objects
     const int smallObjectCount = 100;
@@ -53,7 +51,7 @@ void test_bMalloc() {
     }
     
     //Allocates a large number of large memory objects
-    const int largeObjectCount = 1000;
+    const int largeObjectCount = 10000000;
     for (int i = 0; i < largeObjectCount; ++i) {
         void* charObject = b.allocate(sizeof(char));
         b.deallocate(charObject);
@@ -79,8 +77,8 @@ void test_bMalloc() {
     assert(*dynamicInt == 69);
     std::cout << "Dynamic int value from B_Malloc: " << *dynamicInt << std::endl;
     b.deallocate(dynamicInt);
-    //Performs the benchmark timing
 
+    //Performs the benchmark timing -----------
     // //times how long it takes to malloc() and free() memory
     // //Returns a time point representing the current point in time
     // //https://en.cppreference.com/w/cpp/chrono/high_resolution_clock/now
@@ -94,7 +92,7 @@ void test_bMalloc() {
     std::chrono::duration<double> duration = end - start;
 
     std::cout << "Time taken for 1000 allocations and deallocations: " <<
-    duration.count() << " seconds." << std::endl;
+    std::fixed << std::setprecision(9) << duration.count() << " seconds." << std::endl;
 
     // performs testing for overlapping
     int* int1 = (int*) b.allocate(sizeof(int));
@@ -110,14 +108,15 @@ void test_bMalloc() {
     b.deallocate(int1);
     b.deallocate(int2);
     //-- second part of checking for overlap
-    const int count = 100;
+    const int count = 400;
     int* allocatedIntegers[count];//creates an array of ints
-
+    //iterates over count amount and allocates resource for each index
     for (int i = 0; i < count; ++i) {
         allocatedIntegers[i] = static_cast<int*>(b.allocate(sizeof(int)));
-        *allocatedIntegers[i] = i;
+        *allocatedIntegers[i] = i;//stores a value to that address
     }
-
+    //asserts that no overlaps happened and each int has it's own
+    //supposed value
     for (int i = 0; i < count; ++i) {
         assert(*allocatedIntegers[i] == i);
     }
@@ -139,5 +138,5 @@ void test_bMalloc() {
     std::chrono::duration<double> duration = end - start;
 
     std::cout << "Time taken for 1000 allocations and deallocations: " <<
-    duration.count() << " seconds." << std::endl;
+    std::fixed << std::setprecision(9) << duration.count() << " seconds." << std::endl;
     }//end of bracket for testing new and delete standard library

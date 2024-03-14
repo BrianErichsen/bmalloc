@@ -24,9 +24,7 @@ public:
     void deallocate(void* ptr);
 
 private:
-    // std::vector<HashEntry> hashTable;
     HashTable hashT;
-    size_t hashFunction(void* address);
 };//end of class bracket
 
 #endif //BMALLOC_H
